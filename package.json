@@ -30,8 +30,8 @@
     "web3",
     "dapp"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": "LX Research Labs, Inc.",
+  "license": "Copyright © LX Research Labs, Inc. 2025. All rights reserved.",
   "type": "commonjs",
   "devDependencies": {
     "@types/node": "^22.15.29",
