@@ -1,7 +1,7 @@
 {
-  "name": "roundup-sdk",
+  "name": "@lemondrop/solana-sdk",
   "version": "1.0.0",
-  "description": "",
+  "description": "A JavaScript SDK for easily adding Lemondrop roundups to your Solana dApp",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -13,7 +13,23 @@
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run build"
   },
-  "keywords": [],
+  "keywords": [
+    "sol",
+    "solana",
+    "sdk",
+    "lemondrop",
+    "finance",
+    "defi",
+    "javascript",
+    "typescript",
+    "jupiter",
+    "swap",
+    "token",
+    "crypto",
+    "blockchain",
+    "web3",
+    "dapp"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
@@ -21,5 +37,9 @@
     "@types/node": "^22.15.29",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lemondropfi/solana-sdk-js.git"
   }
 }

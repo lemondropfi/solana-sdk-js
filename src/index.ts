@@ -89,12 +89,10 @@ const feeAccounts: Record<typeof outputTokens[number]['mint'], string> = {
 };
 
 export class Lemondrop {
-    static tokens = {
-        input: inputTokens,
-        output: outputTokens,
-    };
+    inputTokens = inputTokens;
+    outputTokens = outputTokens;
 
-    static roundup = {
+    roundup = {
         create: async ({
             inputToken,
             outputToken,
