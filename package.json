@@ -1,5 +1,5 @@
 {
-  "name": "@lemondrop/solana-sdk",
+  "name": "@lemondropfi/solana-sdk",
   "version": "1.0.0",
   "description": "A JavaScript SDK for easily adding Lemondrop roundups to your Solana dApp",
   "main": "dist/index.js",
