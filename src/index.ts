@@ -30,10 +30,12 @@ export type CreateResponse = {
     feeMint: string;
     feeBps: number;
     prioritizationFeeLamports: number;
-    swapType: string;
+    swapType: "aggregator" | "rfq" | "hashflow";
+    transaction: string | null;
     gasless: boolean;
     requestId: string;
     totalTime: number;
+    taker: string | null;
     quoteId: string;
     maker: string;
     expireAt: string;
@@ -49,7 +51,7 @@ export type CreateResponse = {
 };
 
 export type ExecuteResponse = {
-    status: string;
+    status: "Success" | "Failed";
     signature: string;
     slot: string;
     error: string;
@@ -67,7 +69,7 @@ export type ExecuteResponse = {
 };
 
 const inputTokens: Token[] = [
-    { name: "SOL", symbol: "SOL", mint: "So11111111111111111111111111111111111111111", decimals: 9 },
+    { name: "SOL", symbol: "SOL", mint: "So11111111111111111111111111111111111111112", decimals: 9 },
     { name: "Jito Staked SOL", symbol: "JitoSOL", mint: "J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn", decimals: 9 },
     { name: "Jupiter Staked SOL", symbol: "JupSOL", mint: "jupSoLaHXQiZZTSfEWMTRRgpnyFm8f6sZdosWBjx93v", decimals: 9 },
     { name: "Marinade staked SOL", symbol: "mSOL", mint: "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So", decimals: 9 },
@@ -82,7 +84,7 @@ const outputTokens: Token[] = [
     { name: "Threshold Bitcoin", symbol: "TBTC", mint: "6DNSN2BJsaPFdFFc1zP37kkeNe4Usc1Sqkzr9C9vPWcU", decimals: 8 },
 ];
 
-const feeAccounts: Record<typeof outputTokens[number]['mint'], string> = {
+const feeAccounts: Record<typeof outputTokens[number]["mint"], string> = {
     [outputTokens[0].mint]: "5wZ7QBaj9yKRSB1Jvk7BL7JK83kYXvUfT6Lq5aKYoGKn",
     [outputTokens[1].mint]: "8bc5DkHd1zM5m3uvq8xahX8bgMpSRy7o8S7LF2KhTRLU",
     [outputTokens[2].mint]: "3jykNphaPhnabFdQ8h8nv3WqCbgSt63BhG4k1Qk6gJM9",
@@ -113,9 +115,9 @@ export class Lemondrop {
                 }
 
                 const invalidAmount =
-                    (typeof amount !== 'string' && typeof amount !== 'number') ||
-                    (typeof amount === 'number' && amount <= 0) ||
-                    (typeof amount === 'string' && Number(amount) <= 0);
+                    (typeof amount !== "string" && typeof amount !== "number") ||
+                    (typeof amount === "number" && amount <= 0) ||
+                    (typeof amount === "string" && Number(amount) <= 0);
 
                 if (invalidAmount) {
                     throw new Error("Invalid amount");
