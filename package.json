@@ -1,6 +1,6 @@
 {
   "name": "@lemondropfi/solana-sdk",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A JavaScript SDK for easily adding Lemondrop roundups to your Solana dApp",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -31,7 +31,7 @@
     "dapp"
   ],
   "author": "LX Research Labs, Inc.",
-  "license": "See license",
+  "license": "See LICENSE",
   "type": "commonjs",
   "devDependencies": {
     "@types/node": "^22.15.29",
