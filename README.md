@@ -43,22 +43,22 @@ const outputToken = lemondrop.outputTokens.find(t => t.symbol === 'WBTC');
 const amount = '0.01'; // Amount in input token units (e.g., 0.01 SOL)
 const taker = 'YourSolanaWalletAddress';
 
-const createResponse = await lemondrop.createRoundup({
+const createRoundupResponse = await lemondrop.createRoundup({
   inputToken,
   outputToken,
   amount,
   taker,
 });
 
-// createResponse contains transaction details, route plan, and requestId
-// createResponse.transaction is the unsigned base64 transaction to be signed and sent
+// createRoundupResponse contains transaction details, route plan, and requestId
+// createRoundupResponse.transaction is the unsigned base64 transaction to be signed and sent
 ```
 
 ### Executing a Roundup (Optional)
 After creating a roundup, you have two options:
 
 1. **Use your own wallet or background method:**
-   - Sign and send the transaction (`createResponse.transaction`) using a browser wallet (e.g., Phantom, Solflare) or your own background setup.
+   - Sign and send the transaction (`createRoundupResponse.transaction`) using a browser wallet (e.g., Phantom, Solflare) or your own background setup.
    - This is the most flexible and recommended approach for most dApps.
 
 2. **Call the SDK's `executeRoundup` method (optional):**
@@ -67,14 +67,14 @@ After creating a roundup, you have two options:
 
 ```ts
 const signedTransaction = '...'; // base64-encoded signed transaction
-const requestId = createResponse.requestId;
+const requestId = createRoundupResponse.requestId;
 
-const executeResponse = await lemondrop.executeRoundup({
+const executeRoundupResponse = await lemondrop.executeRoundup({
   signedTransaction,
   requestId,
 });
 
-// executeResponse contains status, signature, and swap event details
+// executeRoundupResponse contains status, signature, and swap event details
 ```
 
 ## API Reference
