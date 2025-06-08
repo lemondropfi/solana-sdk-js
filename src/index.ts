@@ -5,7 +5,7 @@ export type Token = {
     decimals: number;
 };
 
-export type CreateResponse = {
+export type CreateRoundupResponse = {
     inputMint: string;
     outputMint: string;
     inAmount: string;
@@ -50,7 +50,7 @@ export type CreateResponse = {
     };
 };
 
-export type ExecuteResponse = {
+export type ExecuteRoundupResponse = {
     status: "Success" | "Failed";
     signature: string;
     slot: string;
@@ -94,101 +94,99 @@ export class Lemondrop {
     inputTokens = inputTokens;
     outputTokens = outputTokens;
 
-    roundup = {
-        create: async ({
-            inputToken,
-            outputToken,
-            amount,
-            taker,
-        }: {
-            inputToken: typeof inputTokens[number];
-            outputToken: typeof outputTokens[number];
-            amount: string | number;
-            taker: string;
-        }): Promise<CreateResponse> => {
-            try {
-                const invalidInputToken = !inputTokens.some(token => token.mint === inputToken.mint);
-                const invalidOutputToken = !outputTokens.some(token => token.mint === outputToken.mint);
+    createRoundup = async ({
+        inputToken,
+        outputToken,
+        amount,
+        taker,
+    }: {
+        inputToken: typeof inputTokens[number];
+        outputToken: typeof outputTokens[number];
+        amount: string | number;
+        taker: string;
+    }): Promise<CreateRoundupResponse> => {
+        try {
+            const invalidInputToken = !inputTokens.some(token => token.mint === inputToken.mint);
+            const invalidOutputToken = !outputTokens.some(token => token.mint === outputToken.mint);
 
-                if (invalidInputToken || invalidOutputToken) {
-                    throw new Error("Invalid inputToken or outputToken");
-                }
-
-                const invalidAmount =
-                    (typeof amount !== "string" && typeof amount !== "number") ||
-                    (typeof amount === "number" && amount <= 0) ||
-                    (typeof amount === "string" && Number(amount) <= 0);
-
-                if (invalidAmount) {
-                    throw new Error("Invalid amount");
-                }
-
-                if (!taker) {
-                    throw new Error("Invalid taker");
-                }
-
-                const params = {
-                    inputMint: inputToken.mint,
-                    outputMint: outputToken.mint,
-                    amount: Math.floor(
-                        Number(amount) * Math.pow(10, inputToken.decimals)
-                    ).toString(),
-                    taker,
-                    feeAccount: feeAccounts[outputToken.mint],
-                    feeBps: "100",
-                };
-                const searchParams = new URLSearchParams(params);
-                const url = `https://lite-api.jup.ag/ultra/v1/order?${searchParams.toString()}`;
-                const response = await fetch(url);
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(errorText);
-                }
-
-                return await response.json();
-            } catch (err) {
-                console.error("Lemondrop.transaction.create error:", err);
-                throw err;
-            }
-        },
-        execute: async ({
-            signedTransaction,
-            requestId,
-        }: {
-            signedTransaction: string;
-            requestId: string;
-        }): Promise<ExecuteResponse> => {
-            if (!signedTransaction || !requestId) {
-                throw new Error("Invalid signedTransaction or requestId");
+            if (invalidInputToken || invalidOutputToken) {
+                throw new Error("Invalid inputToken or outputToken");
             }
 
-            try {
-                const body = {
-                    signedTransaction,
-                    requestId,
-                };
-                const url = "https://lite-api.jup.ag/ultra/v1/execute";
+            const invalidAmount =
+                (typeof amount !== "string" && typeof amount !== "number") ||
+                (typeof amount === "number" && amount <= 0) ||
+                (typeof amount === "string" && Number(amount) <= 0);
 
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(body),
-                });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(errorText);
-                }
-
-                return await response.json();
-            } catch (err) {
-                console.error("Lemondrop.transaction.execute error:", err);
-                throw err;
+            if (invalidAmount) {
+                throw new Error("Invalid amount");
             }
-        },
-    };
+
+            if (!taker) {
+                throw new Error("Invalid taker");
+            }
+
+            const params = {
+                inputMint: inputToken.mint,
+                outputMint: outputToken.mint,
+                amount: Math.floor(
+                    Number(amount) * Math.pow(10, inputToken.decimals)
+                ).toString(),
+                taker,
+                feeAccount: feeAccounts[outputToken.mint],
+                feeBps: "100",
+            };
+            const searchParams = new URLSearchParams(params);
+            const url = `https://lite-api.jup.ag/ultra/v1/order?${searchParams.toString()}`;
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText);
+            }
+
+            return await response.json();
+        } catch (err) {
+            console.error("Lemondrop.transaction.create error:", err);
+            throw err;
+        }
+    }
+    executeRoundup = async ({
+        signedTransaction,
+        requestId,
+    }: {
+        signedTransaction: string;
+        requestId: string;
+    }): Promise<ExecuteRoundupResponse> => {
+        if (!signedTransaction || !requestId) {
+            throw new Error("Invalid signedTransaction or requestId");
+        }
+
+        try {
+            const body = {
+                signedTransaction,
+                requestId,
+            };
+            const url = "https://lite-api.jup.ag/ultra/v1/execute";
+
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(body),
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText);
+            }
+
+            return await response.json();
+        } catch (err) {
+            console.error("Lemondrop.transaction.execute error:", err);
+            throw err;
+        }
+    }
 }
 
