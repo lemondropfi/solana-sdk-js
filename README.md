@@ -43,7 +43,7 @@ const outputToken = lemondrop.outputTokens.find(t => t.symbol === 'WBTC');
 const amount = '0.01'; // Amount in input token units (e.g., 0.01 SOL)
 const taker = 'YourSolanaWalletAddress';
 
-const createResponse = await lemondrop.roundup.create({
+const createResponse = await lemondrop.createRoundup({
   inputToken,
   outputToken,
   amount,
@@ -61,15 +61,15 @@ After creating a roundup, you have two options:
    - Sign and send the transaction (`createResponse.transaction`) using a browser wallet (e.g., Phantom, Solflare) or your own background setup.
    - This is the most flexible and recommended approach for most dApps.
 
-2. **Call the SDK's `execute` method (optional):**
-   - After signing the transaction, you can call `lemondrop.roundup.execute` to submit it and receive status and swap event details.
+2. **Call the SDK's `executeRoundup` method (optional):**
+   - After signing the transaction, you can call `lemondrop.executeRoundup` to submit it and receive status and swap event details.
    - This is optional and provided for convenience; it returns useful information about the execution status.
 
 ```ts
 const signedTransaction = '...'; // base64-encoded signed transaction
 const requestId = createResponse.requestId;
 
-const executeResponse = await lemondrop.roundup.execute({
+const executeResponse = await lemondrop.executeRoundup({
   signedTransaction,
   requestId,
 });
@@ -82,16 +82,16 @@ const executeResponse = await lemondrop.roundup.execute({
 ### `Lemondrop`
 - `inputTokens`: Array of supported input tokens
 - `outputTokens`: Array of supported output tokens
-- `roundup.create({ inputToken, outputToken, amount, taker })`: Prepares a roundup transaction
-- `roundup.execute({ signedTransaction, requestId })`: (Optional) Executes a signed roundup transaction and returns status
+- `createRoundup({ inputToken, outputToken, amount, taker })`: Prepares a roundup transaction
+- `executeRoundup({ signedTransaction, requestId })`: (Optional) Executes a signed roundup transaction and returns status
 
 ### Types
 - `Token`: `{ name, symbol, mint, decimals }`
-- `CreateResponse`: Quote and transaction details
-- `ExecuteResponse`: Execution result and swap events
+- `CreateRoundupResponse`: Quote and transaction details
+- `ExecuteRoundupResponse`: Execution result and swap events
 
 ## Notes
-- You must sign the transaction using your preferred Solana wallet or library before sending it to the network or calling `execute`.
-- Calling `execute` is optional and only needed if you want the SDK to handle transaction submission and status reporting.
+- You must sign the transaction using your preferred Solana wallet or library before sending it to the network or calling `executeRoundup`.
+- Calling `executeRoundup` is optional and only needed if you want the SDK to handle transaction submission and status reporting.
 - Only the listed tokens are supported.
 - Errors are thrown for invalid tokens, amounts, or API failures.
