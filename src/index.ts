@@ -1,4 +1,4 @@
-export type Token = {
+export type OutputToken = {
     name: string;
     symbol: string;
     mint: string;
@@ -68,63 +68,37 @@ export type ExecuteRoundupResponse = {
     }>;
 };
 
-const inputTokens: Token[] = [
-    { name: "SOL", symbol: "SOL", mint: "So11111111111111111111111111111111111111112", decimals: 9 },
-    { name: "Jito Staked SOL", symbol: "JitoSOL", mint: "J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn", decimals: 9 },
-    { name: "Jupiter Staked SOL", symbol: "JupSOL", mint: "jupSoLaHXQiZZTSfEWMTRRgpnyFm8f6sZdosWBjx93v", decimals: 9 },
-    { name: "Marinade staked SOL", symbol: "mSOL", mint: "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So", decimals: 9 },
-    { name: "Binance Staked SOL", symbol: "BNSOL", mint: "BNso1VUJnh4zcfpZa6986Ea66P6TCp59hvtNJ8b1X85", decimals: 9 },
-    { name: "USD Coin", symbol: "USDC", mint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", decimals: 6 },
-    { name: "USDT", symbol: "USDT", mint: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", decimals: 6 },
-];
-
-const outputTokens: Token[] = [
+const outputTokens: OutputToken[] = [
     { name: "Wrapped BTC (Wormhole)", symbol: "WBTC", mint: "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh", decimals: 8 },
     { name: "Coinbase Wrapped BTC", symbol: "cbBTC", mint: "cbbtcf3aa214zXHbiAZQwf4122FBYbraNdFqgw4iMij", decimals: 8 },
     { name: "Threshold Bitcoin", symbol: "TBTC", mint: "6DNSN2BJsaPFdFFc1zP37kkeNe4Usc1Sqkzr9C9vPWcU", decimals: 8 },
 ];
 
-const feeAccounts: Record<typeof outputTokens[number]["mint"], string> = {
-    [outputTokens[0].mint]: "5wZ7QBaj9yKRSB1Jvk7BL7JK83kYXvUfT6Lq5aKYoGKn",
-    [outputTokens[1].mint]: "8bc5DkHd1zM5m3uvq8xahX8bgMpSRy7o8S7LF2KhTRLU",
-    [outputTokens[2].mint]: "3jykNphaPhnabFdQ8h8nv3WqCbgSt63BhG4k1Qk6gJM9",
-};
-
 export class Lemondrop {
-    inputTokens = inputTokens;
     outputTokens = outputTokens;
 
     createRoundup = async ({
-        inputToken,
+        inputTokenMint,
         outputToken,
         amount,
         taker,
-        referralAccount,
-        referralFee,
     }: {
-        inputToken: typeof inputTokens[number];
-        outputToken: typeof outputTokens[number];
-        amount: string | number;
+        inputTokenMint: string;
+        outputToken: OutputToken;
+        amount: string;
         taker: string;
-        referralAccount?: string;
-        referralFee?: string;
     }): Promise<CreateRoundupResponse> => {
+        if (!outputTokens.find(token => token.mint === outputToken.mint)) {
+            throw new Error("Invalid outputToken");
+        }
+
         try {
             const params: Record<string, string> = {
-                inputMint: inputToken.mint,
+                inputMint: inputTokenMint,
                 outputMint: outputToken.mint,
-                amount: Math.floor(
-                    Number(amount) * Math.pow(10, inputToken.decimals)
-                ).toString(),
+                amount,
                 taker,
             };
-
-            if (referralAccount) {
-                params.referralAccount = referralAccount;
-            }
-            if (referralFee) {
-                params.referralFee = referralFee;
-            }
 
             const searchParams = new URLSearchParams(params);
             const url = `https://lite-api.jup.ag/ultra/v1/order?${searchParams.toString()}`;
@@ -137,7 +111,7 @@ export class Lemondrop {
 
             return await response.json();
         } catch (err) {
-            console.error("Lemondrop.transaction.create error:", err);
+            console.error("Lemondrop.createRoundup error:", err);
             throw err;
         }
     }
@@ -148,8 +122,12 @@ export class Lemondrop {
         signedTransaction: string;
         requestId: string;
     }): Promise<ExecuteRoundupResponse> => {
-        if (!signedTransaction || !requestId) {
-            throw new Error("Invalid signedTransaction or requestId");
+        if (!signedTransaction) {
+            throw new Error("Invalid signedTransaction");
+        }
+
+        if (!requestId) {
+            throw new Error("Invalid requestId");
         }
 
         try {
@@ -174,7 +152,7 @@ export class Lemondrop {
 
             return await response.json();
         } catch (err) {
-            console.error("Lemondrop.transaction.execute error:", err);
+            console.error("Lemondrop.executeRoundup error:", err);
             throw err;
         }
     }

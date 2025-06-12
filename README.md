@@ -1,13 +1,13 @@
 # @lemondropfi/solana-sdk
 
-A compact TypeScript SDK for Bitcoin roundup swaps on Solana. This SDK simplifies swapping from various Solana tokens (SOL, staked SOL, stablecoins) to Bitcoin-wrapped tokens (WBTC, cbBTC, TBTC) with optional referral fee splitting.
+A compact TypeScript SDK for Bitcoin roundup swaps on Solana.
 
 ## Features
 - **Bitcoin-Focused Swaps:** Specialized for swapping to Bitcoin-wrapped tokens on Solana
 - **High-Performance Trading:** Optimal pricing and execution for Bitcoin swaps
-- **Referral Fee Support:** Built-in support for fee sharing through referral accounts
-- **Flexible Token Support:** Supports SOL, liquid staking tokens, and stablecoins as input
+- **Flexible Input Support:** Accepts any Solana token mint address as input
 - **TypeScript Types:** Strongly typed API responses and token definitions
+- **Simple Integration:** Minimal configuration required
 
 ## Installation
 ```sh
@@ -24,42 +24,29 @@ const lemondrop = new Lemondrop();
 ```
 
 ### Supported Tokens
-- **Input tokens:**
-  - SOL, JitoSOL, JupSOL, mSOL, BNSOL, USDC, USDT
+- **Input tokens:** Any valid Solana token mint address
 - **Output tokens:**
   - WBTC (Wormhole), cbBTC (Coinbase), TBTC (Threshold)
 
-Access supported tokens:
+Access supported output tokens:
 ```ts
-lemondrop.inputTokens // Array of input Token objects
-lemondrop.outputTokens // Array of output Token objects
+lemondrop.outputTokens
 ```
 
 ### Creating a Roundup
 Create a swap transaction for Bitcoin roundups:
 
 ```ts
-const inputToken = lemondrop.inputTokens.find(t => t.symbol === 'SOL');
 const outputToken = lemondrop.outputTokens.find(t => t.symbol === 'WBTC');
-const amount = '0.01'; // Amount in input token units (0.01 SOL)
-const taker = 'YourSolanaWalletAddress';
+const inputTokenMint = 'So11111111111111111111111111111111111111112'; // SOL mint
+const amount = '10000000'; // Amount in token's base units (0.01 SOL = 10000000 lamports)
+const taker = 'Mn7Y...aLQm';
 
-// Basic swap without referral fees
 const response = await lemondrop.createRoundup({
-  inputToken,
+  inputTokenMint,
   outputToken,
   amount,
   taker,
-});
-
-// Swap with referral fee (for revenue sharing)
-const responseWithFees = await lemondrop.createRoundup({
-  inputToken,
-  outputToken,
-  amount,
-  taker,
-  referralAccount: 'ReferralAccount', // Optional: referral account
-  referralFee: '50', // Optional: fee in basis points (50 = 0.5%)
 });
 
 // Response contains transaction details, pricing, and execution info
@@ -70,7 +57,7 @@ console.log(response.requestId); // For execution tracking
 ### Executing a Roundup
 After creating a roundup, you have two options:
 
-#### Option 1: Use Your Own Wallet (Recommended)
+#### Option 1: Use Your Own Wallet
 Sign and send the transaction using your preferred wallet or method:
 ```ts
 // Most dApps will handle signing/sending themselves
@@ -82,7 +69,7 @@ const requestId = response.requestId;
 // Handle success/failure
 ```
 
-#### Option 2: Use SDK Execution (Optional)
+#### Option 2: Use SDK Execution
 Let the SDK handle execution after you sign:
 ```ts
 const signedTransaction = '...'; // Your base64-signed transaction
@@ -98,34 +85,9 @@ console.log(result.signature); // Transaction signature
 console.log(result.swapEvents); // Detailed swap information
 ```
 
-## Referral Fee Integration
-
-The SDK supports referral programs for revenue sharing:
-
-```ts
-// Example: 50 basis points (0.5%) referral fee
-const response = await lemondrop.createRoundup({
-  inputToken: solToken,
-  outputToken: wbtcToken,
-  amount: '1.0',
-  taker: userWallet,
-  referralAccount: 'ReferralAccountPubkey',
-  referralFee: '50' // 0.5% fee
-});
-```
-
-### Setting Up Referral Accounts
-**Get started with the referral program:** Visit the [Referral Dashboard](https://referral.jup.ag/) to create your referral account and start earning fees from your integrations.
-
-To use referral fees, you need to:
-1. Create a referral account for fee collection
-2. Initialize token accounts for each token you want to collect fees in
-3. Pass the referral account address in your `createRoundup` calls
-
 ## API Reference
 
 ### `Lemondrop`
-- `inputTokens`: Array of supported input tokens
 - `outputTokens`: Array of supported output tokens
 - `createRoundup(params)`: Creates a swap transaction for Bitcoin roundups
 - `executeRoundup(params)`: (Optional) Executes a signed transaction
@@ -135,12 +97,10 @@ To use referral fees, you need to:
 #### `createRoundup`
 ```ts
 createRoundup({
-  inputToken: Token;
-  outputToken: Token;
-  amount: string | number;
-  taker: string;
-  referralAccount?: string; // Optional referral account for fees
-  referralFee?: string;     // Optional fee in basis points
+  inputTokenMint: string;    // Any Solana token mint address
+  outputToken: OutputToken;  // Bitcoin-wrapped token object
+  amount: string;           // Amount in token's base units
+  taker: string;            // User's wallet address
 }): Promise<CreateRoundupResponse>
 ```
 
@@ -153,7 +113,7 @@ executeRoundup({
 ```
 
 ### Types
-- `Token`: `{ name, symbol, mint, decimals }`
+- `OutputToken`: `{ name, symbol, mint, decimals }`
 - `CreateRoundupResponse`: Complete swap response with transaction, pricing, and route details
 - `ExecuteRoundupResponse`: Execution result with status, signature, and swap events
 
@@ -164,10 +124,10 @@ The SDK provides clear error handling for swap failures:
 ```ts
 try {
   const response = await lemondrop.createRoundup({
-    inputToken,
-    outputToken,
-    amount,
-    taker,
+    inputTokenMint: 'So11111111111111111111111111111111111111112',
+    outputToken: lemondrop.outputTokens.find(t => t.symbol === 'WBTC'),
+    amount: '10000000', // 0.01 SOL
+    taker: 'Mn7Y...aLQm',
   });
 } catch (error) {
   console.error('Swap failed:', error.message);
@@ -182,31 +142,27 @@ try {
 const lemondrop = new Lemondrop();
 
 const response = await lemondrop.createRoundup({
-  inputToken: lemondrop.inputTokens.find(t => t.symbol === 'SOL'),
+  inputTokenMint: 'So11111111111111111111111111111111111111112', // SOL
   outputToken: lemondrop.outputTokens.find(t => t.symbol === 'WBTC'),
-  amount: '1.0', // 1 SOL
-  taker: 'YourWalletAddress'
+  amount: '1000000000', // 1 SOL (1 billion lamports)
+  taker: 'Mn7Y...aLQm'
 });
 
 // Sign response.transaction and send to network
 ```
 
-### USDC to cbBTC with Referral Fees
+### USDC to cbBTC Swap
 ```ts
 const response = await lemondrop.createRoundup({
-  inputToken: lemondrop.inputTokens.find(t => t.symbol === 'USDC'),
+  inputTokenMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // USDC
   outputToken: lemondrop.outputTokens.find(t => t.symbol === 'cbBTC'),
-  amount: '1000', // $1000 USDC
-  taker: 'UserWalletAddress',
-  referralAccount: 'ReferralAccount',
-  referralFee: '25' // 0.25% referral fee
+  amount: '1000000000', // $1,000 USDC (6 decimals = 1 billion micro-USDC)
+  taker: 'Mn7Y...aLQm'
 });
 ```
 
-
-
 ## Notes
 - Optimized for Bitcoin roundup trading on Solana
-- Referral fees enable revenue sharing with partners
-- Supports the major Bitcoin-wrapped tokens on Solana
-- Input tokens include SOL, liquid staking tokens, and major stablecoins
+- Accepts any valid Solana token mint as input
+- Supports swaps to Bitcoin-wrapped tokens (WBTC, cbBTC, TBTC)
+- Amount should be specified in the token's base units (considering decimals)
