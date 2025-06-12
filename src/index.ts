@@ -99,43 +99,33 @@ export class Lemondrop {
         outputToken,
         amount,
         taker,
+        referralAccount,
+        referralFee,
     }: {
         inputToken: typeof inputTokens[number];
         outputToken: typeof outputTokens[number];
         amount: string | number;
         taker: string;
+        referralAccount?: string;
+        referralFee?: string;
     }): Promise<CreateRoundupResponse> => {
         try {
-            const invalidInputToken = !inputTokens.some(token => token.mint === inputToken.mint);
-            const invalidOutputToken = !outputTokens.some(token => token.mint === outputToken.mint);
-
-            if (invalidInputToken || invalidOutputToken) {
-                throw new Error("Invalid inputToken or outputToken");
-            }
-
-            const invalidAmount =
-                (typeof amount !== "string" && typeof amount !== "number") ||
-                (typeof amount === "number" && amount <= 0) ||
-                (typeof amount === "string" && Number(amount) <= 0);
-
-            if (invalidAmount) {
-                throw new Error("Invalid amount");
-            }
-
-            if (!taker) {
-                throw new Error("Invalid taker");
-            }
-
-            const params = {
+            const params: Record<string, string> = {
                 inputMint: inputToken.mint,
                 outputMint: outputToken.mint,
                 amount: Math.floor(
                     Number(amount) * Math.pow(10, inputToken.decimals)
                 ).toString(),
                 taker,
-                feeAccount: feeAccounts[outputToken.mint],
-                feeBps: "100",
             };
+
+            if (referralAccount) {
+                params.referralAccount = referralAccount;
+            }
+            if (referralFee) {
+                params.referralFee = referralFee;
+            }
+
             const searchParams = new URLSearchParams(params);
             const url = `https://lite-api.jup.ag/ultra/v1/order?${searchParams.toString()}`;
             const response = await fetch(url);

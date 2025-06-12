@@ -1,6 +1,6 @@
 {
   "name": "@lemondropfi/solana-sdk",
-  "version": "1.0.7",
+  "version": "1.1.0",
   "description": "A JavaScript SDK for easily adding Lemondrop roundups to your Solana dApp",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
